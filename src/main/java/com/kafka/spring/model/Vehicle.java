@@ -13,7 +13,7 @@ import lombok.Setter;
 public class Vehicle {
 
     @JsonProperty("id")
-	private String vehicleId;
+    private String vehicleId;
 
     @JsonProperty("x")
     private long abscissa;
