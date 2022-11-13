@@ -21,7 +21,7 @@ public class KafKaConsumerService {
 
     @KafkaListener(topics = "${input.topic.name}", groupId = "${input.topic.group.id}",
             containerFactory = "vehicleKafkaInputListenerContainerFactory")
-    public void consume(Vehicle vehicle) {
+    public void consumeByTrackerFirst(Vehicle vehicle) {
         logger.info("Tracker consumer I proceeds to process: '{}'", vehicle);
         double distance = sqrt(pow(vehicle.getAbscissa(), EXTENT) + pow(vehicle.getOrdinatus(), EXTENT));
         String message = String.format("%s has moved %f km", vehicle.getVehicleId(), distance);

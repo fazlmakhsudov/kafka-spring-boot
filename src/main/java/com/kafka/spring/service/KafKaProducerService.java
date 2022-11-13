@@ -16,7 +16,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 @Service
 public class KafKaProducerService {
 
-    private static final Logger logger = LoggerFactory.getLogger(KafKaProducerService.class);
+    private final Logger logger = LoggerFactory.getLogger(KafKaProducerService.class);
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
