@@ -31,6 +31,9 @@ public class KafKaProducerService {
     @Value(value = "${output.topic.name}")
     private String outputTopicName;
 
+    @Autowired
+    private VehicleService vehicleService;
+
     public void sendMessageToInputTopic(String message) {
         ListenableFuture<SendResult<String, String>> future
                 = this.kafkaTemplate.send(inputTopicName, message);
@@ -69,6 +72,7 @@ public class KafKaProducerService {
     }
 
     public void sendVehicleToInputTopic(Vehicle vehicle) {
+        vehicleService.saveVehicle(vehicle);
         ListenableFuture<SendResult<String, Vehicle>> future
                 = this.vehicleKafkaTemplate.send(inputTopicName, vehicle.getVehicleId(), vehicle);
 

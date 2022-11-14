@@ -23,11 +23,15 @@ public class KafKaConsumerService {
     @Autowired
     private KafKaProducerService kafKaProducerService;
 
+    @Autowired
+    private VehicleService vehicleService;
+
     @KafkaListener(topics = "${input.topic.name}", groupId = "${input.topic.group.id}",
             containerFactory = "vehicleKafkaInputListenerContainerFactory")
     public void consumeByTrackerFirst(Vehicle vehicle) {
         log.info("Tracker consumer I proceeds to process: '{}'", vehicle);
-        double distance = sqrt(pow(vehicle.getAbscissa(), EXTENT) + pow(vehicle.getOrdinatus(), EXTENT));
+        Double distance = vehicleService.countTotalDistance(vehicle);
+//        double distance = sqrt(pow(vehicle.getAbscissa(), EXTENT) + pow(vehicle.getOrdinatus(), EXTENT));
         String message = String.format("%s has moved %.2f km", vehicle.getVehicleId(), distance);
         kafKaProducerService.sendMessageToOutputTopic(vehicle.getVehicleId(), message);
         latch.countDown();

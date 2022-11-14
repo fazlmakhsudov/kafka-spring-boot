@@ -44,7 +44,7 @@ public class EmbeddedKafkaTest {
     private static final String RESPONSE_MESSAGE_STRING_WAS_PUBLISHED = "Message was published";
     private static final int TIMEOUT = 2000;
     private static final int ONE = 1;
-    public static final String LOGGER_MESSAGE_PATTERN = "vehicle-1 has moved %.2f km";
+    private static final String LOGGER_MESSAGE_PATTERN = "vehicle-1 has moved %.2f km";
     private static final int ZERO = 0;
 
     private MockMvc mockMvc;
