@@ -1,7 +1,6 @@
 package com.kafka.spring;
 
 
-import com.kafka.spring.KafkaSpringProjectApplication;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -22,9 +21,9 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@EmbeddedKafka(topics = { "testTopic" }, partitions = 3,
-        brokerProperties = { "listeners=PLAINTEXT://localhost:9093", "port=9093" })
-@SpringBootTest (classes = KafkaSpringProjectApplication.class)
+@EmbeddedKafka(topics = {"testTopic"}, partitions = 3,
+        brokerProperties = {"listeners=PLAINTEXT://localhost:9093", "port=9093"})
+@SpringBootTest(classes = KafkaSpringProjectApplication.class)
 public class SimpleKafkaTest {
 
     private static final String TEST_TOPIC = "testTopic";

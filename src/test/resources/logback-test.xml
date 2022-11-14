@@ -8,7 +8,7 @@
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="STDOUT" />
+        <appender-ref ref="STDOUT"/>
     </root>
 
     <!-- Reduce the noise as the consumer keeps trying to connect until the Kafka instance is available -->

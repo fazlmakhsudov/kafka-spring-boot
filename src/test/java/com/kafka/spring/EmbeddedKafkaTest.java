@@ -1,17 +1,6 @@
 package com.kafka.spring;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kafka.spring.KafkaSpringProjectApplication;
 import com.kafka.spring.model.Vehicle;
 import com.kafka.spring.service.KafKaConsumerService;
 import com.kafka.spring.service.KafKaProducerService;
@@ -31,11 +20,20 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=WebEnvironment.MOCK, classes={ KafkaSpringProjectApplication.class })
-@EmbeddedKafka(topics = { "${input.topic.name}","${output.topic.name}" }, partitions = 3,
-        brokerProperties = { "listeners=PLAINTEXT://${kafka.bootstrapAddress}",
-                "port=${kafka.port}" })
+@SpringBootTest(webEnvironment = WebEnvironment.MOCK, classes = {KafkaSpringProjectApplication.class})
+@EmbeddedKafka(topics = {"${input.topic.name}", "${output.topic.name}"}, partitions = 3,
+        brokerProperties = {"listeners=PLAINTEXT://${kafka.bootstrapAddress}",
+                "port=${kafka.port}"})
 public class EmbeddedKafkaTest {
 
     private static final String URL_PUBLISH_STRING = "/kafka/vehicle/publish-string";
@@ -53,6 +51,7 @@ public class EmbeddedKafkaTest {
 
     @SpyBean
     private KafKaProducerService producer;
+
     @Captor
     private ArgumentCaptor<Vehicle> vehicleArgumentCaptor;
 
@@ -84,7 +83,7 @@ public class EmbeddedKafkaTest {
 
     @Test
     public void testProducer() throws Exception {
-        Vehicle vehicle = new Vehicle("vehicle-1", 3,4);
+        Vehicle vehicle = new Vehicle("vehicle-1", 3, 4);
         String vehicleJsonString = objectMapper.writeValueAsString(vehicle);
 
         String responseMessage = mockMvc.perform(post(URL_PUBLISH_OBJECT)

@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping(value = "/kafka/vehicle")
 public class KafkaProducerController {
@@ -33,7 +35,7 @@ public class KafkaProducerController {
 
 
     @PostMapping(value = "/publish-object", consumes = "application/json")
-    public String sendVehicleToKafkaTopic(@RequestBody Vehicle vehicle) {
+    public String sendVehicleToKafkaTopic(@Valid @RequestBody Vehicle vehicle) {
         logger.info("Controller accepted vehicle: {}", vehicle);
         producerService.sendVehicleToInputTopic(vehicle);
         return RESPONSE_MESSAGE_OBJECT_WAS_PUBLISHED;
