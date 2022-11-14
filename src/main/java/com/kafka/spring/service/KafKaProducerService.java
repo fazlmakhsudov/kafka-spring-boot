@@ -3,8 +3,7 @@ package com.kafka.spring.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kafka.spring.model.Vehicle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -14,10 +13,11 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 @Service
+@Slf4j
 public class KafKaProducerService {
 
-    private final Logger logger = LoggerFactory.getLogger(KafKaProducerService.class);
-    private ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -38,13 +38,13 @@ public class KafKaProducerService {
         future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
             @Override
             public void onSuccess(SendResult<String, String> result) {
-                logger.info("+	Sent message: " + message
+                log.info("+	Sent message: " + message
                         + " with offset: " + result.getRecordMetadata().offset());
             }
 
             @Override
             public void onFailure(Throwable ex) {
-                logger.error("+	Unable to send message : " + message, ex);
+                log.error("+	Unable to send message : " + message, ex);
             }
         });
     }
@@ -56,14 +56,14 @@ public class KafKaProducerService {
         future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
             @Override
             public void onSuccess(SendResult<String, String> result) {
-                logger.info("'{}' is sent to Kafka: topic - '{}', partition - '{}', offset - '{}'", message,
+                log.info("'{}' is sent to Kafka: topic - '{}', partition - '{}', offset - '{}'", message,
                         result.getRecordMetadata().topic(), result.getRecordMetadata().partition(),
                         result.getRecordMetadata().offset());
             }
 
             @Override
             public void onFailure(Throwable ex) {
-                logger.error("Unable to send message : " + message, ex);
+                log.error("Unable to send message : " + message, ex);
             }
         });
     }
@@ -77,20 +77,20 @@ public class KafKaProducerService {
             @Override
             public void onSuccess(SendResult<String, Vehicle> result) {
                 try {
-                    logger.info("'{}' is sent to Kafka: topic - '{}', partition - '{}', offset - '{}'",
+                    log.info("'{}' is sent to Kafka: topic - '{}', partition - '{}', offset - '{}'",
                             objectMapper.writeValueAsString(vehicle), result.getRecordMetadata().topic(),
                             result.getRecordMetadata().partition(), result.getRecordMetadata().offset());
                 } catch (JsonProcessingException ex) {
-                    logger.error("Parsing error on success", ex);
+                    log.error("Parsing error on success", ex);
                 }
             }
 
             @Override
             public void onFailure(Throwable ex) {
                 try {
-                    logger.error("Sending failed: " + objectMapper.writeValueAsString(vehicle), ex);
+                    log.error("Sending failed: " + objectMapper.writeValueAsString(vehicle), ex);
                 } catch (JsonProcessingException exception) {
-                    logger.error("Parsing error on failure", exception);
+                    log.error("Parsing error on failure", exception);
                 }
             }
         });
@@ -105,20 +105,20 @@ public class KafKaProducerService {
             @Override
             public void onSuccess(SendResult<String, Vehicle> result) {
                 try {
-                    logger.info("{} is sent to Kafka: topic - '{}', partition - '{}', offset - '{}'",
+                    log.info("{} is sent to Kafka: topic - '{}', partition - '{}', offset - '{}'",
                             objectMapper.writeValueAsString(vehicle), result.getRecordMetadata().topic(),
                             result.getRecordMetadata().partition(), result.getRecordMetadata().offset());
                 } catch (JsonProcessingException ex) {
-                    logger.error("Parsing error on success", ex);
+                    log.error("Parsing error on success", ex);
                 }
             }
 
             @Override
             public void onFailure(Throwable ex) {
                 try {
-                    logger.error(objectMapper.writeValueAsString(vehicle), ex);
+                    log.error(objectMapper.writeValueAsString(vehicle), ex);
                 } catch (JsonProcessingException exception) {
-                    logger.error("Parsing error on failure", exception);
+                    log.error("Parsing error on failure", exception);
                 }
             }
         });

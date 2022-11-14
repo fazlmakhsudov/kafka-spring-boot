@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @EmbeddedKafka(topics = {"testTopic"}, partitions = 3,
         brokerProperties = {"listeners=PLAINTEXT://localhost:9093", "port=9093"})
 @SpringBootTest(classes = KafkaSpringProjectApplication.class)
-public class SimpleKafkaTest {
+public class SingleConsumerProducerKafkaTest {
 
     private static final String TEST_TOPIC = "testTopic";
 
