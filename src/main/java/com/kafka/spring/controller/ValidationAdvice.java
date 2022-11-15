@@ -16,8 +16,8 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 public class ValidationAdvice {
-    private static final String COMMA = ", ";
     private static final String DEFAULT_MESSAGE = "Some illegal request";
+    private static final String STRING_STRING_PATTERN = "%s, %s";
 
     @ResponseStatus(BAD_REQUEST)
     @ResponseBody
@@ -25,7 +25,7 @@ public class ValidationAdvice {
     public ResponseEntity<?> methodArgumentNotValidException(MethodArgumentNotValidException ex) {
         BindingResult result = ex.getBindingResult();
         String errorMessage = result.getFieldErrors().stream().map(FieldError::getDefaultMessage)
-                .reduce((m1, m2) -> m1 + COMMA + m2).orElse(DEFAULT_MESSAGE);
+                .reduce((m1, m2) -> String.format(STRING_STRING_PATTERN, m1, m2)).orElse(DEFAULT_MESSAGE);
         return ResponseEntity.badRequest().body(errorMessage);
     }
 

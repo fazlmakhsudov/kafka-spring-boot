@@ -9,16 +9,17 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CountDownLatch;
 
-import static java.lang.Math.pow;
-import static java.lang.Math.sqrt;
-
 @Service
 @Slf4j
 public class KafKaConsumerService {
-    private static final int EXTENT = 2;
-
-    @Setter
-    private CountDownLatch latch = new CountDownLatch(1);
+    private static final String LOG_TRACKER_CONSUMER_PROCESS_PATTERN = "Tracker consumer %S proceeds to process: '%s'";
+    private static final String VEHICLE_INPUT_LISTENER_FACTORY = "vehicleKafkaInputListenerContainerFactory";
+    private static final String STRING_KAFKA_OUTPUT_LISTENER_FACTORY = "kafkaOutputListenerContainerFactory";
+    private static final String LOG_LOGGING_CONSUMER_RECEIVES_PATTERN = "Logger consumer receives: -> '{}'";
+    private static final String VEHICLE_MOVED_DISTANCE_PATTERN = "%s has moved %.2f km";
+    private static final String ROMAN_THREE = "III";
+    private static final String ROMAN_TWO = "II";
+    private static final String ROMAN_ONE = "I";
 
     @Autowired
     private KafKaProducerService kafKaProducerService;
@@ -26,41 +27,44 @@ public class KafKaConsumerService {
     @Autowired
     private VehicleService vehicleService;
 
+    @Setter
+    private CountDownLatch latch = new CountDownLatch(1);
+
+
     @KafkaListener(topics = "${input.topic.name}", groupId = "${input.topic.group.id}",
-            containerFactory = "vehicleKafkaInputListenerContainerFactory")
+            containerFactory = VEHICLE_INPUT_LISTENER_FACTORY)
     public void consumeByTrackerFirst(Vehicle vehicle) {
-        log.info("Tracker consumer I proceeds to process: '{}'", vehicle);
+        log.info(String.format(LOG_TRACKER_CONSUMER_PROCESS_PATTERN, ROMAN_ONE, vehicle));
         Double distance = vehicleService.countTotalDistance(vehicle);
-//        double distance = sqrt(pow(vehicle.getAbscissa(), EXTENT) + pow(vehicle.getOrdinatus(), EXTENT));
-        String message = String.format("%s has moved %.2f km", vehicle.getVehicleId(), distance);
+        String message = String.format(VEHICLE_MOVED_DISTANCE_PATTERN, vehicle.getVehicleId(), distance);
         kafKaProducerService.sendMessageToOutputTopic(vehicle.getVehicleId(), message);
         latch.countDown();
     }
 
     @KafkaListener(topics = "${input.topic.name}", groupId = "${input.topic.group.id}",
-            containerFactory = "vehicleKafkaInputListenerContainerFactory")
+            containerFactory = VEHICLE_INPUT_LISTENER_FACTORY)
     public void consumeByTrackerSecond(Vehicle vehicle) {
-        log.info("Tracker consumer II proceeds to process: '{}'", vehicle);
-        double distance = sqrt(pow(vehicle.getAbscissa(), EXTENT) + pow(vehicle.getOrdinatus(), EXTENT));
-        String message = String.format("%s has moved %.2f km", vehicle.getVehicleId(), distance);
+        log.info(String.format(LOG_TRACKER_CONSUMER_PROCESS_PATTERN, ROMAN_TWO, vehicle));
+        Double distance = vehicleService.countTotalDistance(vehicle);
+        String message = String.format(VEHICLE_MOVED_DISTANCE_PATTERN, vehicle.getVehicleId(), distance);
         kafKaProducerService.sendMessageToOutputTopic(vehicle.getVehicleId(), message);
         latch.countDown();
     }
 
     @KafkaListener(topics = "${input.topic.name}", groupId = "${input.topic.group.id}",
-            containerFactory = "vehicleKafkaInputListenerContainerFactory")
+            containerFactory = VEHICLE_INPUT_LISTENER_FACTORY)
     public void consumeByTrackerThird(Vehicle vehicle) {
-        log.info("Tracker consumer III proceeds to process: '{}'", vehicle);
-        double distance = sqrt(pow(vehicle.getAbscissa(), EXTENT) + pow(vehicle.getOrdinatus(), EXTENT));
-        String message = String.format("%s has moved %.2f km", vehicle.getVehicleId(), distance);
+        log.info(String.format(LOG_TRACKER_CONSUMER_PROCESS_PATTERN, ROMAN_THREE, vehicle));
+        Double distance = vehicleService.countTotalDistance(vehicle);
+        String message = String.format(VEHICLE_MOVED_DISTANCE_PATTERN, vehicle.getVehicleId(), distance);
         kafKaProducerService.sendMessageToOutputTopic(vehicle.getVehicleId(), message);
         latch.countDown();
     }
 
     @KafkaListener(topics = "${output.topic.name}", groupId = "${output.topic.group.id}",
-            containerFactory = "kafkaOutputListenerContainerFactory")
+            containerFactory = STRING_KAFKA_OUTPUT_LISTENER_FACTORY)
     public void consumeByLogger(String message) {
-        log.info("Logger consumer receives: -> '{}'", message);
+        log.info(LOG_LOGGING_CONSUMER_RECEIVES_PATTERN, message);
         latch.countDown();
     }
 

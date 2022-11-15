@@ -15,6 +15,11 @@ import static java.lang.Math.sqrt;
 @Service
 @Slf4j
 public class VehicleService {
+    private static final String LOG_VEHICLE_WAS_SAVED_PATTERN = "Vehicle was saved in database with id: '{}'";
+    private static final String LOG_VEHICLE_WAS_UPDATED_PATTERN =
+            "Vehicle was updated in database with id: '{}' and updated total distance: '{}' km";
+    private static final String LOG_COVERED_DISTANCE_EQUAL_PATTERN =
+            "New covered distance from previous coordinates is equal: '{}' km";
     private static final Double ZERO = 0d;
     private static final int EXTENT = 2;
 
@@ -30,7 +35,7 @@ public class VehicleService {
             entity.setOrdinatus(vehicle.getOrdinatus());
             entity.setTotalDistance(ZERO);
             entity = repository.save(entity);
-            log.info("Vehicle was saved in database with id: '{}'", entity.getId());
+            log.info(LOG_VEHICLE_WAS_SAVED_PATTERN, entity.getId());
         }
     }
 
@@ -39,7 +44,7 @@ public class VehicleService {
         Double distance = countDistance(vehicle, entity);
         Double totalDistance = distance + entity.getTotalDistance();
         updateVehicle(entity, vehicle, totalDistance);
-        log.info("New covered distance from previous coordinates is equal: '{}' km", distance);
+        log.info(LOG_COVERED_DISTANCE_EQUAL_PATTERN, distance);
         return totalDistance;
     }
 
@@ -48,7 +53,7 @@ public class VehicleService {
         entity.setOrdinatus(vehicle.getOrdinatus());
         entity.setTotalDistance(totalDistance);
         entity = repository.save(entity);
-        log.info("Vehicle was updated in database with id: '{}' and updated total distance: '{}' km", entity.getId(),
+        log.info(LOG_VEHICLE_WAS_UPDATED_PATTERN, entity.getId(),
                 entity.getTotalDistance());
     }
 

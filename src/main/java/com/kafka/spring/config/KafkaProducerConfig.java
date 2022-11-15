@@ -16,6 +16,7 @@ import java.util.Map;
 
 @Configuration
 public class KafkaProducerConfig {
+
     @Value(value = "${kafka.bootstrapAddress}")
     private String bootstrapAddress;
 
@@ -29,7 +30,6 @@ public class KafkaProducerConfig {
         return new KafkaTemplate<>(producerFactory());
     }
 
-    //2. Send vehicle objects to Kafka
     @Bean
     public ProducerFactory<String, Vehicle> vehicleProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();

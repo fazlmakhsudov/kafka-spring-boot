@@ -15,15 +15,23 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 @Service
 @Slf4j
 public class KafKaProducerService {
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private KafkaTemplate<String, String> kafkaTemplate;
+    private static final String LOG_PARSING_ERROR_ON_SUCCESS = "Parsing error on success";
+    private static final String LOG_PARSING_ERROR_ON_FAILURE = "Parsing error on failure";
+    private static final String LOG_VEHICLE_IS_SENT_WIHT_PARAMS_PATTERN =
+            "'{}' is sent to Kafka: topic - '{}', partition - '{}', offset - '{}'";
+    private static final String LOG_SENDING_FAILED_PATTERN = "Sending failed: %s";
 
     @Autowired
     private KafkaTemplate<String, Vehicle> vehicleKafkaTemplate;
+
+    @Autowired
+    private KafkaTemplate<String, String> stringKafkaTemplate;
+
+    @Autowired
+    private VehicleService vehicleService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Value(value = "${input.topic.name}")
     private String inputTopicName;
@@ -31,42 +39,22 @@ public class KafKaProducerService {
     @Value(value = "${output.topic.name}")
     private String outputTopicName;
 
-    @Autowired
-    private VehicleService vehicleService;
-
-    public void sendMessageToInputTopic(String message) {
-        ListenableFuture<SendResult<String, String>> future
-                = this.kafkaTemplate.send(inputTopicName, message);
-
-        future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
-            @Override
-            public void onSuccess(SendResult<String, String> result) {
-                log.info("+	Sent message: " + message
-                        + " with offset: " + result.getRecordMetadata().offset());
-            }
-
-            @Override
-            public void onFailure(Throwable ex) {
-                log.error("+	Unable to send message : " + message, ex);
-            }
-        });
-    }
 
     public void sendMessageToOutputTopic(String key, String message) {
         ListenableFuture<SendResult<String, String>> future
-                = this.kafkaTemplate.send(outputTopicName, key, message);
+                = this.stringKafkaTemplate.send(outputTopicName, key, message);
 
         future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
+
             @Override
             public void onSuccess(SendResult<String, String> result) {
-                log.info("'{}' is sent to Kafka: topic - '{}', partition - '{}', offset - '{}'", message,
-                        result.getRecordMetadata().topic(), result.getRecordMetadata().partition(),
-                        result.getRecordMetadata().offset());
+                log.info(LOG_VEHICLE_IS_SENT_WIHT_PARAMS_PATTERN, message, result.getRecordMetadata().topic(),
+                        result.getRecordMetadata().partition(), result.getRecordMetadata().offset());
             }
 
             @Override
             public void onFailure(Throwable ex) {
-                log.error("Unable to send message : " + message, ex);
+                log.error(String.format(LOG_SENDING_FAILED_PATTERN, message), ex);
             }
         });
     }
@@ -81,48 +69,20 @@ public class KafKaProducerService {
             @Override
             public void onSuccess(SendResult<String, Vehicle> result) {
                 try {
-                    log.info("'{}' is sent to Kafka: topic - '{}', partition - '{}', offset - '{}'",
-                            objectMapper.writeValueAsString(vehicle), result.getRecordMetadata().topic(),
-                            result.getRecordMetadata().partition(), result.getRecordMetadata().offset());
+                    log.info(LOG_VEHICLE_IS_SENT_WIHT_PARAMS_PATTERN, objectMapper.writeValueAsString(vehicle),
+                            result.getRecordMetadata().topic(), result.getRecordMetadata().partition(),
+                            result.getRecordMetadata().offset());
                 } catch (JsonProcessingException ex) {
-                    log.error("Parsing error on success", ex);
+                    log.error(LOG_PARSING_ERROR_ON_SUCCESS, ex);
                 }
             }
 
             @Override
             public void onFailure(Throwable ex) {
                 try {
-                    log.error("Sending failed: " + objectMapper.writeValueAsString(vehicle), ex);
+                    log.error(String.format(LOG_SENDING_FAILED_PATTERN, objectMapper.writeValueAsString(vehicle)), ex);
                 } catch (JsonProcessingException exception) {
-                    log.error("Parsing error on failure", exception);
-                }
-            }
-        });
-    }
-
-    public void sendVehicleToOutputTopic(Vehicle vehicle) {
-        ListenableFuture<SendResult<String, Vehicle>> future
-                = this.vehicleKafkaTemplate.send(outputTopicName, vehicle.getVehicleId(), vehicle);
-
-        future.addCallback(new ListenableFutureCallback<SendResult<String, Vehicle>>() {
-
-            @Override
-            public void onSuccess(SendResult<String, Vehicle> result) {
-                try {
-                    log.info("{} is sent to Kafka: topic - '{}', partition - '{}', offset - '{}'",
-                            objectMapper.writeValueAsString(vehicle), result.getRecordMetadata().topic(),
-                            result.getRecordMetadata().partition(), result.getRecordMetadata().offset());
-                } catch (JsonProcessingException ex) {
-                    log.error("Parsing error on success", ex);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable ex) {
-                try {
-                    log.error(objectMapper.writeValueAsString(vehicle), ex);
-                } catch (JsonProcessingException exception) {
-                    log.error("Parsing error on failure", exception);
+                    log.error(LOG_PARSING_ERROR_ON_FAILURE, exception);
                 }
             }
         });

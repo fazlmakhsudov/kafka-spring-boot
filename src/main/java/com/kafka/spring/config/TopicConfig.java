@@ -24,9 +24,6 @@ public class TopicConfig {
     @Value(value = "${kafka.replication-factor.count}")
     private int replicationFactorCount;
 
-    public TopicConfig() {
-    }
-
     @Bean
     public NewTopic inputTopic() {
         return TopicBuilder.name(inputTopicName)

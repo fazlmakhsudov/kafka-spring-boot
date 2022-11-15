@@ -4,9 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kafka.spring.model.Vehicle;
 import com.kafka.spring.service.KafKaConsumerService;
 import com.kafka.spring.service.KafKaProducerService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.http.MediaType;
 import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -33,21 +30,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK, classes = {KafkaSpringProjectApplication.class})
 @EmbeddedKafka(topics = {"${input.topic.name}", "${output.topic.name}"}, partitions = 3,
         brokerProperties = {"listeners=PLAINTEXT://${kafka.bootstrapAddress}", "port=${kafka.port}"})
 public class EmbeddedKafkaTest {
-    private static final String URL_PUBLISH_STRING = "/kafka/vehicle/publish-string";
-    private static final String URL_PUBLISH_OBJECT = "/kafka/vehicle/publish-object";
     private static final String RESPONSE_MESSAGE_OBJECT_WAS_PUBLISHED = "Object was published";
-    private static final String RESPONSE_MESSAGE_STRING_WAS_PUBLISHED = "Message was published";
-    private static final int TIMEOUT = 2000;
-    private static final int ONE = 1;
+    private static final String URL_PUBLISH_OBJECT = "/kafka/vehicle/publish-object";
     private static final String LOGGER_MESSAGE_PATTERN = "vehicle-1 has moved %.2f km";
+    private static final String VEHICLE_1 = "vehicle-1";
+    private static final int TIMEOUT = 2000;
+    private static final int ORDINATUS = 4;
+    private static final int ABSCISSA = 3;
+    private static final int EXTENT = 2;
     private static final int ZERO = 0;
-
-    private MockMvc mockMvc;
+    private static final int ONE = 1;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -73,27 +69,17 @@ public class EmbeddedKafkaTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Before
+    private MockMvc mockMvc;
+
+    @BeforeEach
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
     @Test
-    public void testPublishStringEndpoint() throws Exception {
-        String responseMessage = mockMvc.perform(post(URL_PUBLISH_STRING)
-                .contentType(MediaType.TEXT_PLAIN)
-                .content("Just simple message")
-                .accept(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        assertEquals(RESPONSE_MESSAGE_STRING_WAS_PUBLISHED, responseMessage);
-    }
-
-    @Test
     public void testKafkaService() throws Exception {
-        Vehicle vehicle = new Vehicle("vehicle-1", 3, 4);
-        double distance = sqrt(pow(vehicle.getAbscissa(), 2) + pow(vehicle.getOrdinatus(), 2));
+        Vehicle vehicle = new Vehicle(VEHICLE_1, ABSCISSA, ORDINATUS);
+        double distance = sqrt(pow(vehicle.getAbscissa(), EXTENT) + pow(vehicle.getOrdinatus(), EXTENT));
         String vehicleJsonString = objectMapper.writeValueAsString(vehicle);
 
         String responseMessage = mockMvc.perform(post(URL_PUBLISH_OBJECT)
