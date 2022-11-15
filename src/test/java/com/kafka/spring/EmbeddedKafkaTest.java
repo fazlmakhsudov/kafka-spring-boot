@@ -35,8 +35,8 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
         brokerProperties = {"listeners=PLAINTEXT://${kafka.bootstrapAddress}", "port=${kafka.port}"})
 public class EmbeddedKafkaTest {
     private static final String RESPONSE_MESSAGE_OBJECT_WAS_PUBLISHED = "Object was published";
-    private static final String URL_PUBLISH_OBJECT = "/kafka/vehicle/publish-object";
     private static final String LOGGER_MESSAGE_PATTERN = "vehicle-1 has moved %.2f km";
+    private static final String URL_PUBLISH_OBJECT = "/kafka/vehicle/publish";
     private static final String VEHICLE_1 = "vehicle-1";
     private static final int TIMEOUT = 2000;
     private static final int ORDINATUS = 4;
@@ -86,7 +86,7 @@ public class EmbeddedKafkaTest {
                 .contentType(APPLICATION_JSON)
                 .content(vehicleJsonString)
                 .accept(APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
         assertEquals(RESPONSE_MESSAGE_OBJECT_WAS_PUBLISHED, responseMessage);
