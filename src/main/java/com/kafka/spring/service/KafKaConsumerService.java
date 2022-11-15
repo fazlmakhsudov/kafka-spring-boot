@@ -1,13 +1,10 @@
 package com.kafka.spring.service;
 
 import com.kafka.spring.model.Vehicle;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.CountDownLatch;
 
 @Service
 @Slf4j
@@ -27,10 +24,6 @@ public class KafKaConsumerService {
     @Autowired
     private VehicleService vehicleService;
 
-    @Setter
-    private CountDownLatch latch = new CountDownLatch(1);
-
-
     @KafkaListener(topics = "${input.topic.name}", groupId = "${input.topic.group.id}",
             containerFactory = VEHICLE_INPUT_LISTENER_FACTORY)
     public void consumeByTrackerFirst(Vehicle vehicle) {
@@ -38,7 +31,6 @@ public class KafKaConsumerService {
         Double distance = vehicleService.countTotalDistance(vehicle);
         String message = String.format(VEHICLE_MOVED_DISTANCE_PATTERN, vehicle.getVehicleId(), distance);
         kafKaProducerService.sendMessageToOutputTopic(vehicle.getVehicleId(), message);
-        latch.countDown();
     }
 
     @KafkaListener(topics = "${input.topic.name}", groupId = "${input.topic.group.id}",
@@ -48,7 +40,6 @@ public class KafKaConsumerService {
         Double distance = vehicleService.countTotalDistance(vehicle);
         String message = String.format(VEHICLE_MOVED_DISTANCE_PATTERN, vehicle.getVehicleId(), distance);
         kafKaProducerService.sendMessageToOutputTopic(vehicle.getVehicleId(), message);
-        latch.countDown();
     }
 
     @KafkaListener(topics = "${input.topic.name}", groupId = "${input.topic.group.id}",
@@ -58,14 +49,12 @@ public class KafKaConsumerService {
         Double distance = vehicleService.countTotalDistance(vehicle);
         String message = String.format(VEHICLE_MOVED_DISTANCE_PATTERN, vehicle.getVehicleId(), distance);
         kafKaProducerService.sendMessageToOutputTopic(vehicle.getVehicleId(), message);
-        latch.countDown();
     }
 
     @KafkaListener(topics = "${output.topic.name}", groupId = "${output.topic.group.id}",
             containerFactory = STRING_KAFKA_OUTPUT_LISTENER_FACTORY)
     public void consumeByLogger(String message) {
         log.info(LOG_LOGGING_CONSUMER_RECEIVES_PATTERN, message);
-        latch.countDown();
     }
 
 }
